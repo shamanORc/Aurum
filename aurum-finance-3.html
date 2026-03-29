@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Aurum · Finanças</title>
+<meta name="description" content="Aurum — seu app de finanças pessoais premium">
+<meta name="theme-color" content="#f5f3ef" id="metaTheme">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Aurum">
+<link rel="manifest" id="pwaManifest">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   TOKENS — Light (default) + Dark
+═══════════════════════════════════════════ */
+:root {
+  --bg:        #f5f3ef;
+  --bg2:       #eceae4;
+  --surface:   #ffffff;
+  --card:      #ffffffcc;
+  --border:    rgba(0,0,0,.08);
+  --border2:   rgba(0,0,0,.05);
+  --text:      #1a1814;
+  --text2:     #5a5650;
+  --muted:     #9e9890;
+  --gold:      #b8892a;
+  --gold-l:    #d4a84b;
+  --gold-d:    #8a6518;
+  --gold-bg:   rgba(184,137,42,.1);
+  --gold-glow: rgba(184,137,42,.22);
+  --green:     #2d7a5f;
+  --green-bg:  rgba(45,122,95,.1);
+  --red:       #c0392b;
+  --red-bg:    rgba(192,57,43,.1);
+  --blue:      #2b6cb0;
+  --blue-bg:   rgba(43,108,176,.1);
+  --shadow:    0 2px 20px rgba(0,0,0,.07);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,.12);
+  --glass:     rgba(255,255,255,.72);
+  --glass-bdr: rgba(255,255,255,.6);
+  --radius:    20px;
+  --radius-sm: 14px;
+  --fab-text:  #fff;
+  --nav-bg:    rgba(245,243,239,.88);
+  --toggle-bg: #e8e4de;
+  --input-bg:  #f0ede7;
+  --theme-icon: '☀️';
+}
+[data-theme="dark"] {
+  --bg:        #0c0b10;
+  --bg2:       #111019;
+  --surface:   #141320;
+  --card:      #1a192aaa;
+  --border:    rgba(255,255,255,.07);
+  --border2:   rgba(255,255,255,.04);
+  --text:      #ede8e0;
+  --text2:     #9490a0;
+  --muted:     #5a5668;
+  --gold:      #c9a84c;
+  --gold-l:    #e8c97a;
+  --gold-d:    #a07d30;
+  --gold-bg:   rgba(201,168,76,.1);
+  --gold-glow: rgba(201,168,76,.25);
+  --green:     #4caf7d;
+  --green-bg:  rgba(76,175,125,.1);
+  --red:       #e05c5c;
+  --red-bg:    rgba(224,92,92,.1);
+  --blue:      #5c9ee0;
+  --blue-bg:   rgba(92,158,224,.1);
+  --shadow:    0 2px 20px rgba(0,0,0,.4);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,.6);
+  --glass:     rgba(20,19,32,.75);
+  --glass-bdr: rgba(255,255,255,.06);
+  --fab-text:  #0c0b10;
+  --nav-bg:    rgba(12,11,16,.9);
+  --toggle-bg: #1e1d2a;
+  --input-bg:  #1a192a;
+  --theme-icon: '🌙';
+}
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);font-family:'Outfit',sans-serif;color:var(--text);overflow:hidden;transition:background .4s,color .4s}
+#app{height:100dvh;display:flex;flex-direction:column;max-width:430px;margin:0 auto;position:relative;overflow:hidden}
+
+/* ═══════════════════════════════════════════
+   ANIMATED BG ORBS
+═══════════════════════════════════════════ */
+.orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;transition:all .5s}
+.orb1{width:280px;height:280px;top:-80px;right:-80px;background:radial-gradient(circle,var(--gold-glow) 0%,transparent 70%);animation:orbFloat 8s ease-in-out infinite}
+.orb2{width:200px;height:200px;bottom:100px;left:-60px;background:radial-gradient(circle,var(--gold-glow) 0%,transparent 70%);animation:orbFloat 10s ease-in-out infinite reverse}
+@keyframes orbFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(20px) scale(1.05)}}
+
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+.header{padding:18px 22px 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;z-index:2}
+.logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:500;color:var(--gold);letter-spacing:.02em}
+.logo em{font-style:italic;font-weight:400}
+.hdr-right{display:flex;gap:10px;align-items:center}
+.icon-btn{width:36px;height:36px;border-radius:50%;background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--glass-bdr);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;transition:.25s;box-shadow:var(--shadow)}
+.icon-btn:active{transform:scale(.92)}
+
+/* ═══════════════════════════════════════════
+   MONTH BAR
+═══════════════════════════════════════════ */
+.month-bar{padding:12px 22px 8px;display:flex;gap:6px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;position:relative;z-index:2}
+.month-bar::-webkit-scrollbar{display:none}
+.mth-btn{padding:7px 16px;border-radius:40px;border:1px solid var(--border);background:var(--glass);backdrop-filter:blur(8px);color:var(--muted);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;transition:.2s;white-space:nowrap;font-weight:400}
+.mth-btn.active{background:var(--gold);color:#fff;border-color:var(--gold);font-weight:500;box-shadow:0 4px 16px var(--gold-glow)}
+
+/* ═══════════════════════════════════════════
+   SCROLL AREA
+═══════════════════════════════════════════ */
+.scroll{flex:1;overflow-y:auto;padding:0 22px 110px;position:relative;z-index:1}
+.scroll::-webkit-scrollbar{display:none}
+.page{display:none}.page.active{display:block}
+
+/* ═══════════════════════════════════════════
+   BALANCE CARD — glass hero
+═══════════════════════════════════════════ */
+.balance-card{
+  background:var(--glass);
+  backdrop-filter:blur(24px);
+  border:1px solid var(--glass-bdr);
+  border-radius:var(--radius);
+  padding:22px;
+  margin-bottom:12px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:var(--shadow-lg);
+  animation:cardIn .5s cubic-bezier(.2,0,.2,1) both;
+}
+.balance-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold-l),transparent);opacity:.5}
+.balance-card::after{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;background:radial-gradient(circle,var(--gold-glow) 0%,transparent 70%);pointer-events:none}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+.bal-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.bal-value{font-family:'Playfair Display',serif;font-size:44px;font-weight:400;line-height:1;letter-spacing:-.01em;transition:color .3s}
+.bal-value .currency{font-size:20px;color:var(--muted);vertical-align:super;font-family:'Outfit',sans-serif;font-weight:300;margin-right:4px}
+.bal-sub{display:flex;gap:0;margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
+.bal-item{flex:1;padding:0 4px}
+.bal-item+.bal-item{border-left:1px solid var(--border)}
+.bal-item-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.bal-item-value{font-size:15px;font-weight:600}
+.c-green{color:var(--green)}.c-red{color:var(--red)}.c-gold{color:var(--gold)}
+
+/* ═══════════════════════════════════════════
+   BUDGET PROGRESS
+═══════════════════════════════════════════ */
+.budget-card{background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--glass-bdr);border-radius:var(--radius-sm);padding:16px 18px;margin-bottom:12px;box-shadow:var(--shadow);animation:cardIn .5s .1s both}
+.budget-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.budget-title{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.budget-amt{font-size:12px;font-weight:600;color:var(--gold)}
+.prog-track{height:6px;background:var(--toggle-bg);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;transition:width 1s cubic-bezier(.4,0,.2,1),background .4s}
+.budget-hint{font-size:10px;color:var(--muted);margin-top:6px}
+
+/* ═══════════════════════════════════════════
+   INSIGHT CARD
+═══════════════════════════════════════════ */
+.insight-card{background:var(--gold-bg);border:1px solid rgba(184,137,42,.2);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:12px;display:flex;align-items:flex-start;gap:12px;animation:cardIn .5s .15s both}
+.insight-icon{font-size:22px;flex-shrink:0;margin-top:1px}
+.insight-text{font-size:13px;line-height:1.5;color:var(--text2)}
+.insight-text strong{color:var(--text);font-weight:600}
+
+/* ═══════════════════════════════════════════
+   GRID MINI CARDS
+═══════════════════════════════════════════ */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.mini-card{background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--glass-bdr);border-radius:var(--radius-sm);padding:16px;box-shadow:var(--shadow);animation:cardIn .5s .2s both}
+.mini-icon{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:10px}
+.mini-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.mini-value{font-size:17px;font-weight:600}
+
+/* ═══════════════════════════════════════════
+   LINE CHART
+═══════════════════════════════════════════ */
+.chart-card{background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--glass-bdr);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow);animation:cardIn .5s .25s both;overflow:hidden}
+.chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.chart-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:400}
+.chart-sub{font-size:11px;color:var(--muted)}
+.line-chart-wrap{position:relative;height:110px;margin:0 -4px}
+svg.line-chart{width:100%;height:100%;overflow:visible}
+.chart-tooltip{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;color:var(--text);pointer-events:none;opacity:0;transition:opacity .15s;box-shadow:var(--shadow);white-space:nowrap;z-index:10}
+.x-labels{display:flex;justify-content:space-between;margin-top:6px;padding:0 4px}
+.x-label{font-size:9px;color:var(--muted);text-align:center;flex:1}
+
+/* ═══════════════════════════════════════════
+   SECTION TITLE
+═══════════════════════════════════════════ */
+.section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.section-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:400}
+.section-link{font-size:12px;color:var(--gold);background:none;border:none;cursor:pointer;font-family:'Outfit',sans-serif;letter-spacing:.04em}
+
+/* ═══════════════════════════════════════════
+   TRANSACTION LIST
+═══════════════════════════════════════════ */
+.tx-list{display:flex;flex-direction:column;gap:8px}
+.tx-wrap{position:relative;overflow:hidden;border-radius:var(--radius-sm)}
+.tx-delete-bg{position:absolute;inset:0;background:var(--red-bg);display:flex;align-items:center;justify-content:flex-end;padding-right:20px;border-radius:var(--radius-sm)}
+.tx-delete-bg span{font-size:20px}
+.tx{
+  background:var(--glass);
+  backdrop-filter:blur(12px);
+  border:1px solid var(--glass-bdr);
+  border-radius:var(--radius-sm);
+  padding:13px 15px;
+  display:flex;align-items:center;gap:12px;
+  position:relative;
+  z-index:1;
+  transition:transform .25s cubic-bezier(.4,0,.2,1);
+  touch-action:pan-y;
+  box-shadow:var(--shadow);
+}
+.tx-icon{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.tx-info{flex:1;min-width:0}
+.tx-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-cat{font-size:11px;color:var(--muted);margin-top:2px}
+.tx-right{text-align:right;flex-shrink:0}
+.tx-amt{font-size:14px;font-weight:600}
+.tx-date{font-size:10px;color:var(--muted);margin-top:2px}
+.tx-recur{font-size:9px;color:var(--gold);margin-top:2px;letter-spacing:.04em}
+.empty-state{text-align:center;padding:36px 16px;color:var(--muted)}
+.empty-icon{font-size:36px;margin-bottom:10px;opacity:.5}
+.empty-text{font-size:13px}
+
+/* ═══════════════════════════════════════════
+   DONUT CHART
+═══════════════════════════════════════════ */
+.donut-row{display:flex;align-items:center;gap:16px;margin-top:12px}
+.donut-svg{width:110px;height:110px;flex-shrink:0;transform:rotate(-90deg)}
+.legend{flex:1;display:flex;flex-direction:column;gap:9px}
+.leg-item{display:flex;align-items:center;gap:8px}
+.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.leg-name{font-size:12px;color:var(--text2);flex:1}
+.leg-pct{font-size:11px;font-weight:600;color:var(--text)}
+
+/* ═══════════════════════════════════════════
+   GOALS
+═══════════════════════════════════════════ */
+.goal-card{background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--glass-bdr);border-radius:var(--radius-sm);padding:16px;margin-bottom:10px;box-shadow:var(--shadow)}
+.goal-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.goal-emoji{font-size:24px}
+.goal-info{flex:1}
+.goal-name{font-size:14px;font-weight:600}
+.goal-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.goal-pct-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--gold-bg);color:var(--gold)}
+.goal-prog-track{height:8px;background:var(--toggle-bg);border-radius:99px;overflow:hidden}
+.goal-prog-fill{height:100%;background:linear-gradient(90deg,var(--gold-d),var(--gold-l));border-radius:99px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.goal-amounts{display:flex;justify-content:space-between;margin-top:6px}
+.goal-amt-label{font-size:10px;color:var(--muted)}
+.goal-btn-row{display:flex;gap:8px;margin-top:12px}
+.goal-btn{flex:1;padding:9px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text2);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;transition:.2s}
+.goal-btn.primary{background:var(--gold-bg);border-color:rgba(184,137,42,.3);color:var(--gold);font-weight:500}
+.goal-btn:active{opacity:.75}
+
+/* ═══════════════════════════════════════════
+   RECURRENTS
+═══════════════════════════════════════════ */
+.recur-card{background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--glass-bdr);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.recur-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.recur-info{flex:1}
+.recur-name{font-size:14px;font-weight:500}
+.recur-day{font-size:11px;color:var(--muted);margin-top:2px}
+.recur-amt{font-size:14px;font-weight:600}
+.recur-del{width:28px;height:28px;border-radius:8px;background:var(--red-bg);border:none;color:var(--red);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* ═══════════════════════════════════════════
+   HISTORY BAR CHART (6 months)
+═══════════════════════════════════════════ */
+.hist-bars{display:flex;align-items:flex-end;gap:8px;height:100px;margin-top:12px}
+.hbar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px}
+.hbar{width:100%;border-radius:6px 6px 3px 3px;min-height:4px;transition:height .9s cubic-bezier(.4,0,.2,1);position:relative}
+.hbar-lbl{font-size:9px;color:var(--muted);letter-spacing:.04em}
+.hbar-val{font-size:8px;color:var(--muted);margin-top:2px}
+
+/* ═══════════════════════════════════════════
+   BOTTOM NAV — glass
+═══════════════════════════════════════════ */
+.bottom-nav{
+  position:absolute;bottom:0;left:0;right:0;
+  max-width:430px;margin:0 auto;
+  background:var(--nav-bg);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  border-top:1px solid var(--glass-bdr);
+  display:flex;justify-content:space-around;
+  padding:10px 0 max(16px,env(safe-area-inset-bottom));
+  z-index:20;
+  transition:background .4s;
+}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:6px 20px;position:relative}
+.nav-icon{font-size:22px;color:var(--muted);transition:.2s}
+.nav-btn.active .nav-icon{color:var(--gold)}
+.nav-pip{width:4px;height:4px;border-radius:50%;background:var(--gold);opacity:0;transition:.2s;margin-top:1px}
+.nav-btn.active .nav-pip{opacity:1}
+.nav-label{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.nav-btn.active .nav-label{color:var(--gold)}
+
+/* ═══════════════════════════════════════════
+   FAB — animated
+═══════════════════════════════════════════ */
+.fab-wrap{position:absolute;bottom:82px;right:22px;z-index:25}
+.fab{width:54px;height:54px;border-radius:50%;background:var(--gold);border:none;color:var(--fab-text);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 28px var(--gold-glow);transition:.25s;position:relative;z-index:2}
+.fab:active{transform:scale(.92)}
+.fab-icon{font-size:26px;line-height:1;transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.fab.open .fab-icon{transform:rotate(45deg)}
+.fab-menu{position:absolute;bottom:64px;right:0;display:flex;flex-direction:column;gap:8px;align-items:flex-end;opacity:0;pointer-events:none;transition:.25s cubic-bezier(.4,0,.2,1);transform:translateY(10px)}
+.fab-menu.open{opacity:1;pointer-events:all;transform:translateY(0)}
+.fab-item{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.fab-item-label{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px 14px;font-size:13px;font-weight:500;box-shadow:var(--shadow);color:var(--text)}
+.fab-sub{width:42px;height:42px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer;box-shadow:var(--shadow);transition:.2s}
+.fab-sub:active{transform:scale(.9)}
+
+/* ═══════════════════════════════════════════
+   MODAL — glass drawer
+═══════════════════════════════════════════ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);z-index:50;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:.25s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--surface);
+  border:1px solid var(--glass-bdr);
+  border-radius:28px 28px 0 0;
+  padding:0;
+  width:100%;max-width:430px;
+  transform:translateY(100%);
+  transition:.35s cubic-bezier(.4,0,.2,1);
+  max-height:88dvh;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  box-shadow:0 -8px 40px rgba(0,0,0,.2);
+}
+.overlay.open .modal{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border);margin:14px auto 0}
+.modal-scroll{overflow-y:auto;padding:20px 22px 32px;flex:1}
+.modal-scroll::-webkit-scrollbar{display:none}
+.modal-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;margin-bottom:20px;color:var(--text)}
+.type-row{display:flex;gap:8px;margin-bottom:16px;background:var(--toggle-bg);padding:4px;border-radius:14px}
+.type-btn{flex:1;padding:10px;border-radius:11px;border:none;background:transparent;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;transition:.25s;color:var(--muted);font-weight:500}
+.type-btn.sel-exp{background:var(--surface);color:var(--red);box-shadow:var(--shadow)}
+.type-btn.sel-inc{background:var(--surface);color:var(--green);box-shadow:var(--shadow)}
+.field{margin-bottom:14px}
+.field label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;background:var(--input-bg);border:1.5px solid transparent;border-radius:13px;padding:13px 15px;color:var(--text);font-family:'Outfit',sans-serif;font-size:15px;outline:none;transition:.25s;-webkit-appearance:none}
+.field input:focus,.field select:focus{border-color:var(--gold);background:var(--surface)}
+.field select option{background:var(--surface)}
+.field input[type="checkbox"]{width:auto;accent-color:var(--gold)}
+.check-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--border2)}
+.check-row label{font-size:14px;color:var(--text2);cursor:pointer;flex:1}
+.btn-primary{width:100%;padding:15px;border-radius:15px;background:var(--gold);border:none;color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:6px;transition:.2s;letter-spacing:.02em;box-shadow:0 4px 20px var(--gold-glow)}
+.btn-primary:active{opacity:.85;transform:scale(.98)}
+.btn-secondary{width:100%;padding:13px;border-radius:15px;background:transparent;border:1.5px solid var(--border);color:var(--text2);font-family:'Outfit',sans-serif;font-size:14px;cursor:pointer;margin-top:8px;transition:.2s}
+
+/* SETTINGS */
+.set-card{background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--glass-bdr);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow)}
+.set-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;margin-bottom:16px}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border2)}
+.set-row:last-child{border-bottom:none}
+.set-row-label{font-size:14px;color:var(--text2)}
+.set-row-val{font-size:13px;font-weight:600;color:var(--gold)}
+.danger-btn{width:100%;padding:13px;border-radius:13px;background:var(--red-bg);border:1px solid rgba(192,57,43,.2);color:var(--red);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:.2s}
+
+/* SWIPE hint */
+.swipe-hint{text-align:center;padding:8px 0 0;font-size:10px;color:var(--muted);letter-spacing:.05em;opacity:.6}
+
+/* ═══ PROFILE PAGE ═══ */
+.profile-hero{margin-top:4px;margin-bottom:14px;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--glass-bdr);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-lg);animation:profileHeroIn .55s cubic-bezier(.2,0,.2,1) both}
+@keyframes profileHeroIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.profile-cover{height:130px;background:linear-gradient(135deg,var(--gold-d),var(--gold),var(--gold-l));position:relative;cursor:pointer;overflow:hidden}
+.profile-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,.3))}
+.profile-cover-img{width:100%;height:100%;object-fit:cover;display:block}
+.profile-cover-edit{position:absolute;bottom:8px;right:10px;z-index:2;background:rgba(0,0,0,.42);color:#fff;border:none;border-radius:8px;padding:5px 11px;font-size:11px;font-family:'Outfit',sans-serif;cursor:pointer;backdrop-filter:blur(8px)}
+.profile-identity{display:flex;align-items:flex-end;gap:14px;padding:12px 18px 14px;border-bottom:1px solid var(--border2)}
+.profile-avatar-wrap{width:74px;height:74px;border-radius:50%;border:3px solid var(--surface);overflow:hidden;flex-shrink:0;box-shadow:0 4px 18px rgba(0,0,0,.22);cursor:pointer;position:relative;transition:transform .2s;margin-top:-42px;background:var(--gold-bg)}
+.profile-avatar-wrap:active{transform:scale(.93)}
+.profile-avatar-img{width:100%;height:100%;object-fit:cover;display:block}
+.profile-avatar-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:30px;background:linear-gradient(135deg,var(--gold-d),var(--gold-l));color:#fff;font-family:'Playfair Display',serif;font-weight:500}
+.profile-avatar-badge{position:absolute;bottom:1px;right:1px;width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid var(--surface);pointer-events:none}
+.profile-name-col{flex:1;min-width:0;padding-bottom:2px}
+.profile-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:nameSlide .45s .05s both}
+@keyframes nameSlide{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.profile-job-tag{font-size:11px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profile-bio-row{padding:12px 18px 14px;border-bottom:1px solid var(--border2)}
+.profile-bio{font-size:13px;color:var(--text2);line-height:1.55}
+.profile-location{font-size:11px;color:var(--muted);margin-top:5px}
+.profile-stats-row{display:flex}
+.profile-stat{flex:1;text-align:center;padding:13px 4px}
+.profile-stat+.profile-stat{border-left:1px solid var(--border2)}
+.profile-stat-val{font-size:19px;font-weight:700;color:var(--gold);font-family:'Playfair Display',serif}
+.profile-stat-lbl{font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.profile-section{background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--glass-bdr);border-radius:var(--radius);overflow:hidden;margin-bottom:12px;box-shadow:var(--shadow)}
+.profile-section-title{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:13px 18px 10px;border-bottom:1px solid var(--border2)}
+.profile-field-row{display:flex;align-items:center;gap:13px;padding:13px 18px;border-bottom:1px solid var(--border2);cursor:pointer;transition:background .15s;-webkit-tap-highlight-color:transparent;position:relative}
+.profile-field-row:last-child{border-bottom:none}
+.profile-field-row:active{background:var(--gold-bg)}
+.profile-field-icon{font-size:19px;width:28px;text-align:center;flex-shrink:0}
+.profile-field-info{flex:1;min-width:0}
+.profile-field-label{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.profile-field-val{font-size:14px;color:var(--text);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .25s}
+.profile-field-val.empty{color:var(--muted)}
+.profile-field-val.val-saved{animation:valPop .35s cubic-bezier(.2,0,.2,1) both}
+@keyframes valPop{0%{opacity:0;transform:translateY(5px) scale(.97)}60%{transform:translateY(-2px) scale(1.01)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.profile-edit-arrow{color:var(--muted);font-size:16px;flex-shrink:0;transition:transform .2s}
+.profile-field-row:active .profile-edit-arrow{transform:translateX(3px)}
+.theme-pill{display:flex;background:var(--toggle-bg);border-radius:40px;padding:3px;gap:2px;border:1px solid var(--border)}
+.theme-opt{flex:1;padding:8px 10px;border-radius:36px;border:none;font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;transition:.25s;color:var(--muted);background:transparent;font-weight:500;white-space:nowrap;text-align:center}
+.theme-opt.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow);font-weight:600}
+.pwa-banner{position:fixed;bottom:90px;left:16px;right:16px;max-width:398px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-lg);z-index:100;animation:slideUp .4s cubic-bezier(.4,0,.2,1) both}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.pwa-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--gold-d),var(--gold-l));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.pwa-text{flex:1}.pwa-title{font-size:14px;font-weight:600;color:var(--text)}.pwa-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.pwa-btns{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.pwa-install{background:var(--gold);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;box-shadow:0 2px 10px var(--gold-glow)}
+.pwa-dismiss{background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif;text-align:center}
+
+/* ═══ NAPOLEON HILL QUOTE ═══ */
+.nh-card{
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--gold-d) 0%,var(--gold) 50%,var(--gold-l) 100%);
+  border-radius:var(--radius);padding:22px 20px 18px;margin-bottom:14px;
+  box-shadow:0 6px 28px var(--gold-glow);
+  animation:cardIn .5s both;
+}
+.nh-card::before{content:'❝';position:absolute;top:-8px;left:12px;font-size:72px;color:rgba(255,255,255,.15);font-family:'Playfair Display',serif;line-height:1;pointer-events:none}
+.nh-card::after{content:'';position:absolute;bottom:0;right:0;width:100px;height:100px;background:radial-gradient(circle,rgba(255,255,255,.12) 0%,transparent 70%);pointer-events:none}
+.nh-quote{font-family:'Playfair Display',serif;font-size:15px;font-style:italic;line-height:1.6;color:#fff;position:relative;z-index:1;margin-bottom:12px;letter-spacing:.01em}
+.nh-author{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.7);position:relative;z-index:1;font-weight:600}
+.nh-dots{display:flex;gap:6px;margin-top:14px;justify-content:center}
+.nh-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;transition:.2s}
+.nh-dot.active{background:#fff;width:16px;border-radius:3px}
+
+/* ═══ 52 SEMANAS ═══ */
+.w52-card{
+  background:var(--glass);backdrop-filter:blur(16px);
+  border:1px solid var(--glass-bdr);border-radius:var(--radius);
+  padding:20px;margin-bottom:14px;box-shadow:var(--shadow);
+  animation:cardIn .5s .1s both;
+}
+.w52-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;gap:8px}
+.w52-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:400}
+.w52-badge{background:var(--gold-bg);border:1px solid rgba(184,137,42,.25);color:var(--gold);font-size:11px;font-weight:700;padding:4px 12px;border-radius:99px;white-space:nowrap;flex-shrink:0}
+.w52-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.w52-stats{display:flex;gap:0;margin-bottom:16px;padding:12px 0;border-top:1px solid var(--border2);border-bottom:1px solid var(--border2)}
+.w52-stat{flex:1;text-align:center;padding:0 6px}
+.w52-stat+.w52-stat{border-left:1px solid var(--border2)}
+.w52-stat-val{font-size:20px;font-weight:700;color:var(--gold);font-family:'Playfair Display',serif}
+.w52-stat-lbl{font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.w52-prog-track{height:6px;background:var(--toggle-bg);border-radius:99px;overflow:hidden;margin-bottom:18px}
+.w52-prog-fill{height:100%;background:linear-gradient(90deg,var(--gold-d),var(--gold-l));border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.w52-grid{display:grid;grid-template-columns:repeat(13,1fr);gap:4px;margin-bottom:10px}
+.w52-week{
+  aspect-ratio:1;border-radius:5px;border:1.5px solid var(--border);
+  background:var(--input-bg);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:7px;color:var(--muted);font-weight:600;
+  transition:all .18s cubic-bezier(.4,0,.2,1);
+  position:relative;user-select:none;-webkit-user-select:none;
+}
+.w52-week:active{transform:scale(.82)}
+.w52-week.done{
+  background:var(--gold);border-color:var(--gold-d);color:#fff;
+  box-shadow:0 2px 8px var(--gold-glow);
+}
+.w52-week.done::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff}
+.w52-week.current{border-color:var(--gold);border-width:2px;color:var(--gold);background:var(--gold-bg)}
+.w52-week.done .w52-wnum,.w52-week.current .w52-wnum{opacity:0}
+.w52-week:not(.done):not(.current) .w52-wnum{opacity:.6}
+.w52-legend{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.w52-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.w52-leg-box{width:10px;height:10px;border-radius:3px}
+.w52-reset{font-size:10px;color:var(--muted);background:none;border:1px solid var(--border);cursor:pointer;margin-left:auto;padding:4px 10px;border-radius:8px;transition:.2s;font-family:'Outfit',sans-serif}
+.w52-reset:active{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+
+/* Animações stagger */
+.stagger-0{animation:cardIn .4s .0s both}
+.stagger-1{animation:cardIn .4s .06s both}
+.stagger-2{animation:cardIn .4s .12s both}
+.stagger-3{animation:cardIn .4s .18s both}
+.stagger-4{animation:cardIn .4s .24s both}
+.stagger-5{animation:cardIn .4s .30s both}
+
+/* number count up */
+@keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.count-anim{animation:countUp .5s cubic-bezier(.2,0,.2,1) both}
+
+/* Confetti */
+.confetti-piece{position:fixed;width:8px;height:8px;top:-10px;border-radius:2px;pointer-events:none;z-index:999;animation:confettiFall linear forwards}
+@keyframes confettiFall{to{transform:translateY(110dvh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div id="app">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">Au<em>rum</em></div>
+    <div class="hdr-right">
+      <div class="icon-btn" id="themeBtn" title="Alternar tema">☀️</div>
+      <div class="icon-btn" onclick="goPage('set',document.querySelectorAll('.nav-btn')[99]||{classList:{add:()=>{},remove:()=>{}}})" title="Configurações">⚙️</div>
+    </div>
+  </div>
+
+  <!-- MONTH BAR -->
+  <div class="month-bar" id="monthBar"></div>
+
+  <!-- SCROLL -->
+  <div class="scroll" id="mainScroll">
+
+    <!-- ── PÁGINA: INÍCIO ── -->
+    <div id="pageDash" class="page active">
+      <div class="balance-card stagger-0">
+        <div class="bal-label">Saldo do período</div>
+        <div class="bal-value" id="balVal"><span class="currency">R$</span><span id="balNum">0,00</span></div>
+        <div class="bal-sub">
+          <div class="bal-item">
+            <div class="bal-item-label">Receitas</div>
+            <div class="bal-item-value c-green" id="incVal">R$ 0,00</div>
+          </div>
+          <div class="bal-item" style="padding-left:16px">
+            <div class="bal-item-label">Gastos</div>
+            <div class="bal-item-value c-red" id="expVal">R$ 0,00</div>
+          </div>
+          <div class="bal-item" style="padding-left:16px">
+            <div class="bal-item-label">Lançamentos</div>
+            <div class="bal-item-value c-gold" id="countVal">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="budgetSection" style="display:none" class="stagger-1">
+        <div class="budget-card">
+          <div class="budget-row">
+            <span class="budget-title">Orçamento do mês</span>
+            <span class="budget-amt" id="budgetAmt">—</span>
+          </div>
+          <div class="prog-track"><div class="prog-fill" id="budgetFill" style="width:0%"></div></div>
+          <div class="budget-hint" id="budgetHint"></div>
+        </div>
+      </div>
+
+      <div id="insightSection" class="stagger-2"></div>
+
+      <div class="grid2 stagger-3">
+        <div class="mini-card">
+          <div class="mini-icon" style="background:var(--green-bg)">📈</div>
+          <div class="mini-label">Maior receita</div>
+          <div class="mini-value c-green" id="maxInc">—</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-icon" style="background:var(--red-bg)">🔥</div>
+          <div class="mini-label">Maior gasto</div>
+          <div class="mini-value c-red" id="maxExp">—</div>
+        </div>
+      </div>
+
+      <!-- Gráfico de linha -->
+      <div class="chart-card stagger-4">
+        <div class="chart-header">
+          <div class="chart-title">Evolução</div>
+          <div class="chart-sub">Últimos 30 dias</div>
+        </div>
+        <div class="line-chart-wrap" id="lineWrap">
+          <svg class="line-chart" id="lineChart" viewBox="0 0 300 110" preserveAspectRatio="none"></svg>
+          <div class="chart-tooltip" id="chartTooltip"></div>
+        </div>
+        <div class="x-labels" id="lineLabels"></div>
+      </div>
+
+      <div class="section-head stagger-5">
+        <div class="section-title">Últimos</div>
+        <button class="section-link" onclick="goPage('trans',document.querySelectorAll('.nav-btn')[1])">Ver todos →</button>
+      </div>
+      <div class="tx-list" id="txDash"></div>
+      <p class="swipe-hint">← Deslize para excluir</p>
+    </div>
+
+    <!-- ── PÁGINA: TRANSAÇÕES ── -->
+    <div id="pageTrans" class="page">
+      <div class="section-head" style="margin-top:4px;margin-bottom:12px">
+        <div class="section-title">Lançamentos</div>
+        <div id="txCount" style="font-size:12px;color:var(--muted)"></div>
+      </div>
+      <div class="tx-list" id="txAll"></div>
+    </div>
+
+    <!-- ── PÁGINA: ANÁLISE ── -->
+    <div id="pageStats" class="page">
+      <!-- Histograma 6 meses -->
+      <div class="chart-card stagger-0" style="margin-top:4px">
+        <div class="chart-header">
+          <div class="chart-title">Histórico</div>
+          <div class="chart-sub">6 meses · gastos</div>
+        </div>
+        <div class="hist-bars" id="histBars"></div>
+        <div class="x-labels" id="histLabels"></div>
+      </div>
+
+      <!-- Donut categorias -->
+      <div class="chart-card stagger-1">
+        <div class="chart-header"><div class="chart-title">Por categoria</div></div>
+        <div class="donut-row">
+          <svg class="donut-svg" viewBox="0 0 36 36" id="donutSvg"></svg>
+          <div class="legend" id="legend"></div>
+        </div>
+      </div>
+
+      <!-- Comparativo -->
+      <div class="chart-card stagger-2">
+        <div class="chart-header">
+          <div class="chart-title">Comparativo</div>
+          <div class="chart-sub">2 meses</div>
+        </div>
+        <div id="compWrap" style="display:flex;gap:12px;align-items:flex-end;height:80px;margin-top:12px"></div>
+        <div id="compLabels" style="display:flex;gap:12px;margin-top:8px"></div>
+      </div>
+    </div>
+
+    <!-- ── PÁGINA: METAS ── -->
+    <div id="pageGoals" class="page">
+
+      <!-- Napoleon Hill Quote Carousel -->
+      <div class="nh-card" id="nhCard" onclick="nextQuote()" style="cursor:pointer;margin-top:4px">
+        <div class="nh-quote" id="nhQuote"></div>
+        <div class="nh-author">— Napoleão Hill</div>
+        <div class="nh-dots" id="nhDots"></div>
+      </div>
+
+      <!-- 52 Semanas -->
+      <div class="w52-card">
+        <div class="w52-header">
+          <div class="w52-title">Projeto 52 Semanas</div>
+          <div class="w52-badge" id="w52Badge">0 / 52</div>
+        </div>
+        <div class="w52-sub">Marque cada semana concluída. Um ano de comprometimento com seus objetivos definitivos.</div>
+        <div class="w52-stats">
+          <div class="w52-stat">
+            <div class="w52-stat-val" id="w52Done">0</div>
+            <div class="w52-stat-lbl">Concluídas</div>
+          </div>
+          <div class="w52-stat">
+            <div class="w52-stat-val" id="w52Left">52</div>
+            <div class="w52-stat-lbl">Restantes</div>
+          </div>
+          <div class="w52-stat">
+            <div class="w52-stat-val" id="w52Pct">0%</div>
+            <div class="w52-stat-lbl">Progresso</div>
+          </div>
+        </div>
+        <div class="w52-prog-track">
+          <div class="w52-prog-fill" id="w52Fill" style="width:0%"></div>
+        </div>
+        <div class="w52-grid" id="w52Grid"></div>
+        <div class="w52-legend">
+          <div class="w52-leg-item"><div class="w52-leg-box" style="background:var(--gold)"></div>Concluída</div>
+          <div class="w52-leg-item"><div class="w52-leg-box" style="background:var(--gold-bg);border:1.5px solid var(--gold)"></div>Atual</div>
+          <div class="w52-leg-item"><div class="w52-leg-box" style="background:var(--input-bg);border:1.5px solid var(--border)"></div>Pendente</div>
+          <button class="w52-reset" onclick="resetWeeks()">Reiniciar</button>
+        </div>
+      </div>
+
+      <!-- Metas financeiras -->
+      <div class="section-head" style="margin-bottom:12px">
+        <div class="section-title">Metas Financeiras</div>
+        <button class="section-link" onclick="openModal('goal')">+ Nova</button>
+      </div>
+      <div id="goalList"></div>
+
+      <!-- Recorrentes -->
+      <div class="section-head" style="margin-top:16px;margin-bottom:10px">
+        <div class="section-title" style="font-size:18px">Recorrentes</div>
+        <button class="section-link" onclick="openModal('recur')">+ Novo</button>
+      </div>
+      <div id="recurList"></div>
+    </div>
+
+    <!-- ── PÁGINA: CONFIG ── -->
+    <div id="pageSet" class="page">
+      <div class="set-card stagger-0" style="margin-top:4px">
+        <div class="set-title">Tema</div>
+        <div class="theme-pill">
+          <button class="theme-opt" id="thOptLight" onclick="applyTheme('light')">☀️ Claro</button>
+          <button class="theme-opt" id="thOptDark" onclick="applyTheme('dark')">🌙 Escuro</button>
+        </div>
+      </div>
+      <div class="set-card stagger-1">
+        <div class="set-title">Orçamento mensal</div>
+        <div class="field">
+          <label>Limite de gastos (R$)</label>
+          <input type="number" id="budgetInput" placeholder="Ex: 3000" inputmode="decimal">
+        </div>
+        <button class="btn-primary" onclick="saveBudget()">Salvar</button>
+      </div>
+      <div class="set-card stagger-2">
+        <div class="set-title">Resumo</div>
+        <div class="set-row">
+          <span class="set-row-label">Total de transações</span>
+          <span class="set-row-val" id="statTotal">0</span>
+        </div>
+        <div class="set-row">
+          <span class="set-row-label">Metas ativas</span>
+          <span class="set-row-val" id="statGoals">0</span>
+        </div>
+        <div class="set-row">
+          <span class="set-row-label">Recorrentes</span>
+          <span class="set-row-val" id="statRecur">0</span>
+        </div>
+        <div class="set-row">
+          <span class="set-row-label">Armazenamento</span>
+          <span class="set-row-val" style="font-size:11px" id="storageInfo">local</span>
+        </div>
+      </div>
+      <div class="set-card stagger-3">
+        <div class="set-title" style="color:var(--red)">Zona de perigo</div>
+        <button class="danger-btn" onclick="clearAll()">🗑 Apagar todos os dados</button>
+      </div>
+      <div style="text-align:center;padding:20px 0;color:var(--muted);font-size:10px;letter-spacing:.1em">AURUM FINANÇAS · v3.0 · PWA · 100% LOCAL</div>
+    </div>
+
+    <!-- ── PÁGINA: PERFIL ── -->
+    <div id="pageProfile" class="page">
+
+      <!-- Hero com capa e avatar -->
+      <div class="profile-hero">
+        <!-- Capa -->
+        <div class="profile-cover" id="profileCover" onclick="triggerCoverUpload()">
+          <img id="coverImg" class="profile-cover-img" style="display:none">
+          <div class="profile-cover-edit">✏️ Editar capa</div>
+        </div>
+        <!-- Avatar + Nome (avatar sobe sobre a capa via margin-top negativo) -->
+        <div class="profile-identity">
+          <div class="profile-avatar-wrap" id="avatarWrap" onclick="triggerAvatarUpload()">
+            <div class="profile-avatar-placeholder" id="avatarPlaceholder">?</div>
+            <img id="avatarImg" class="profile-avatar-img" style="display:none">
+            <div class="profile-avatar-badge">✏️</div>
+          </div>
+          <div class="profile-name-col">
+            <div class="profile-name" id="profileNameDisplay">Seu Nome</div>
+            <div class="profile-job-tag" id="profileJobTag"></div>
+          </div>
+        </div>
+        <!-- Bio -->
+        <div class="profile-bio-row">
+          <div class="profile-bio" id="profileBioDisplay">Adicione uma bio...</div>
+          <div class="profile-location" id="profileLocDisplay"></div>
+        </div>
+        <!-- Stats -->
+        <div class="profile-stats-row">
+          <div class="profile-stat">
+            <div class="profile-stat-val" id="psTx">0</div>
+            <div class="profile-stat-lbl">Lançamentos</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-val" id="psGoals">0</div>
+            <div class="profile-stat-lbl">Metas</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-val" id="psWeeks">0</div>
+            <div class="profile-stat-lbl">Semanas</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informações pessoais -->
+      <div class="profile-section stagger-1">
+        <div class="profile-section-title">Informações pessoais</div>
+        <div class="profile-field-row" onclick="editProfileField('name','Seu nome','text')">
+          <div class="profile-field-icon">👤</div>
+          <div class="profile-field-info">
+            <div class="profile-field-label">Nome</div>
+            <div class="profile-field-val" id="pfName">—</div>
+          </div>
+          <div class="profile-edit-arrow">›</div>
+        </div>
+        <div class="profile-field-row" onclick="editProfileField('email','seu@email.com','email')">
+          <div class="profile-field-icon">✉️</div>
+          <div class="profile-field-info">
+            <div class="profile-field-label">E-mail</div>
+            <div class="profile-field-val" id="pfEmail">—</div>
+          </div>
+          <div class="profile-edit-arrow">›</div>
+        </div>
+        <div class="profile-field-row" onclick="editProfileField('phone','(00) 00000-0000','tel')">
+          <div class="profile-field-icon">📱</div>
+          <div class="profile-field-info">
+            <div class="profile-field-label">Telefone</div>
+            <div class="profile-field-val" id="pfPhone">—</div>
+          </div>
+          <div class="profile-edit-arrow">›</div>
+        </div>
+        <div class="profile-field-row" onclick="editProfileField('birthday','','date')">
+          <div class="profile-field-icon">🎂</div>
+          <div class="profile-field-info">
+            <div class="profile-field-label">Nascimento</div>
+            <div class="profile-field-val" id="pfBirthday">—</div>
+          </div>
+          <div class="profile-edit-arrow">›</div>
+        </div>
+      </div>
+
+      <!-- Localização e bio -->
+      <div class="profile-section stagger-2">
+        <div class="profile-section-title">Sobre você</div>
+        <div class="profile-field-row" onclick="editProfileField('city','Sua cidade','text')">
+          <div class="profile-field-icon">📍</div>
+          <div class="profile-field-info">
+            <div class="profile-field-label">Cidade</div>
+            <div class="profile-field-val" id="pfCity">—</div>
+          </div>
+          <div class="profile-edit-arrow">›</div>
+        </div>
+        <div class="profile-field-row" onclick="editProfileField('job','Sua profissão','text')">
+          <div class="profile-field-icon">💼</div>
+          <div class="profile-field-info">
+            <div class="profile-field-label">Profissão</div>
+            <div class="profile-field-val" id="pfJob">—</div>
+          </div>
+          <div class="profile-edit-arrow">›</div>
+        </div>
+        <div class="profile-field-row" onclick="editProfileField('bio','Conte um pouco sobre você...','textarea')">
+          <div class="profile-field-icon">📝</div>
+          <div class="profile-field-info">
+            <div class="profile-field-label">Bio</div>
+            <div class="profile-field-val" id="pfBio" style="white-space:normal;line-height:1.4">—</div>
+          </div>
+          <div class="profile-edit-arrow">›</div>
+        </div>
+      </div>
+
+      <!-- Objetivo financeiro -->
+      <div class="profile-section stagger-3">
+        <div class="profile-section-title">Objetivo financeiro</div>
+        <div class="profile-field-row" onclick="editProfileField('goal','Ex: Independência financeira em 5 anos','text')">
+          <div class="profile-field-icon">🎯</div>
+          <div class="profile-field-info">
+            <div class="profile-field-label">Objetivo definitivo</div>
+            <div class="profile-field-val" id="pfGoal" style="white-space:normal;line-height:1.4">—</div>
+          </div>
+          <div class="profile-edit-arrow">›</div>
+        </div>
+        <div class="profile-field-row" onclick="editProfileField('income','0','decimal')">
+          <div class="profile-field-icon">💰</div>
+          <div class="profile-field-info">
+            <div class="profile-field-label">Renda mensal (R$)</div>
+            <div class="profile-field-val" id="pfIncome">—</div>
+          </div>
+          <div class="profile-edit-arrow">›</div>
+        </div>
+      </div>
+
+      <!-- hidden file inputs -->
+      <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
+      <input type="file" id="coverInput" accept="image/*" style="display:none" onchange="handleCoverUpload(event)">
+
+      <div style="text-align:center;padding:16px 0;color:var(--muted);font-size:10px;letter-spacing:.08em">Todas as fotos ficam salvas localmente no seu dispositivo</div>
+    </div>
+
+  </div><!-- /scroll -->
+
+  <!-- PWA Banner -->
+  <div class="pwa-banner" id="pwaBanner" style="display:none">
+    <div class="pwa-icon">💰</div>
+    <div class="pwa-text">
+      <div class="pwa-title">Instalar Aurum</div>
+      <div class="pwa-sub">Acesso rápido na tela inicial</div>
+    </div>
+    <div class="pwa-btns">
+      <button class="pwa-install" onclick="installPwa()">Instalar</button>
+      <button class="pwa-dismiss" onclick="dismissPwa()">Agora não</button>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <div class="fab-wrap" id="fabWrap">
+    <div class="fab-menu" id="fabMenu">
+      <div class="fab-item">
+        <div class="fab-item-label">💰 Receita</div>
+        <button class="fab-sub" style="background:var(--green-bg);color:var(--green)" onclick="openModal('inc')">+</button>
+      </div>
+      <div class="fab-item">
+        <div class="fab-item-label">💸 Gasto</div>
+        <button class="fab-sub" style="background:var(--red-bg);color:var(--red)" onclick="openModal('exp')">−</button>
+      </div>
+    </div>
+    <button class="fab" id="fabBtn" onclick="toggleFab()">
+      <span class="fab-icon">+</span>
+    </button>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="goPage('dash',this)">
+      <span class="nav-icon">⌂</span>
+      <span class="nav-pip"></span>
+      <span class="nav-label">Início</span>
+    </button>
+    <button class="nav-btn" onclick="goPage('trans',this)">
+      <span class="nav-icon">☰</span>
+      <span class="nav-pip"></span>
+      <span class="nav-label">Lançamentos</span>
+    </button>
+    <button class="nav-btn" onclick="goPage('stats',this)">
+      <span class="nav-icon">◎</span>
+      <span class="nav-pip"></span>
+      <span class="nav-label">Análise</span>
+    </button>
+    <button class="nav-btn" onclick="goPage('goals',this)">
+      <span class="nav-icon">🎯</span>
+      <span class="nav-pip"></span>
+      <span class="nav-label">Metas</span>
+    </button>
+    <button class="nav-btn" onclick="goPage('profile',this)">
+      <span class="nav-icon" id="navProfileIcon">👤</span>
+      <span class="nav-pip"></span>
+      <span class="nav-label">Perfil</span>
+    </button>
+  </nav>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-scroll" id="modalScroll"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE & STORAGE
+// ═══════════════════════════════════════════
+const KEY = 'aurum_v2';
+let D = JSON.parse(localStorage.getItem(KEY) || 'null') || {
+  transactions: [], goals: [], recurrents: [], budget: 0, theme: 'light',
+  weeks: [], nhIdx: 0,
+  profile: { name:'', email:'', phone:'', birthday:'', city:'', job:'', bio:'', goal:'', income:'' },
+  avatarImg: '', coverImg: ''
+};
+// Migrate old data
+if (!D.profile) D.profile = { name:'', email:'', phone:'', birthday:'', city:'', job:'', bio:'', goal:'', income:'' };
+if (!D.weeks) D.weeks = [];
+if (!D.avatarImg) D.avatarImg = '';
+if (!D.coverImg) D.coverImg = '';
+let currentMonthOffset = 0; // 0=this month, 1=last, …
+let fabOpen = false;
+let currentModalType = '';
+let editGoalId = null;
+
+function save() { localStorage.setItem(KEY, JSON.stringify(D)); }
+
+// ═══════════════════════════════════════════
+//  THEME
+// ═══════════════════════════════════════════
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('themeBtn').textContent = t === 'dark' ? '🌙' : '☀️';
+  // Update meta theme-color for PWA
+  const mt = document.getElementById('metaTheme');
+  if (mt) mt.content = t === 'dark' ? '#0c0b10' : '#f5f3ef';
+  // Update pill
+  const l = document.getElementById('thOptLight');
+  const dk = document.getElementById('thOptDark');
+  if (l) l.classList.toggle('active', t === 'light');
+  if (dk) dk.classList.toggle('active', t === 'dark');
+  D.theme = t; save();
+}
+document.getElementById('themeBtn').onclick = () => applyTheme(D.theme === 'dark' ? 'light' : 'dark');
+
+// ═══════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════
+function fmt(v) { return 'R$ ' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtShort(v) { return v>=1000 ? 'R$'+(v/1000).toFixed(1)+'k' : fmt(v); }
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+
+function getMonthRange(offset) {
+  const now = new Date();
+  const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+  return { year: d.getFullYear(), month: d.getMonth() };
+}
+function inMonth(tx, offset) {
+  const { year, month } = getMonthRange(offset);
+  const d = new Date(tx.date + 'T12:00:00');
+  return d.getFullYear() === year && d.getMonth() === month;
+}
+function filtered(offset = currentMonthOffset) {
+  return D.transactions.filter(t => inMonth(t, offset));
+}
+function monthLabel(offset) {
+  const { year, month } = getMonthRange(offset);
+  const d = new Date(year, month, 1);
+  return d.toLocaleDateString('pt-BR', {month:'short', year:'2-digit'}).replace('/',"'");
+}
+
+// Auto-insert recurrents for current month
+function insertRecurrents() {
+  const { year, month } = getMonthRange(0);
+  D.recurrents.forEach(r => {
+    const day = Math.min(r.day, new Date(year, month+1, 0).getDate());
+    const date = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const exists = D.transactions.some(t => t.recurId === r.id && t.date === date);
+    if (!exists) {
+      D.transactions.push({ id: uid(), name: r.name, amount: r.amount, cat: r.cat, date, type: r.type, recurId: r.id });
+    }
+  });
+  save();
+}
+
+// ═══════════════════════════════════════════
+//  MONTH BAR
+// ═══════════════════════════════════════════
+function buildMonthBar() {
+  const bar = document.getElementById('monthBar');
+  bar.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'mth-btn' + (i === currentMonthOffset ? ' active' : '');
+    btn.textContent = i === 0 ? 'Este mês' : monthLabel(i);
+    btn.onclick = () => { currentMonthOffset = i; buildMonthBar(); renderAll(); };
+    bar.appendChild(btn);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  INSIGHTS
+// ═══════════════════════════════════════════
+function buildInsight(txs) {
+  const el = document.getElementById('insightSection');
+  if (!txs.length) { el.innerHTML = ''; return; }
+  const exp = txs.filter(t=>t.type==='exp');
+  if (!exp.length) { el.innerHTML = ''; return; }
+
+  const insights = [];
+  // Cat mais gasta
+  const cats = {};
+  exp.forEach(t => cats[t.cat] = (cats[t.cat]||0) + t.amount);
+  const topCat = Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];
+  if (topCat) insights.push({ icon:'🏆', text: `<strong>${topCat[0].split(' ').slice(1).join(' ')}</strong> é sua maior categoria este mês: <strong>${fmt(topCat[1])}</strong>` });
+
+  // Comparativo mês anterior
+  const prevTxs = filtered(currentMonthOffset + 1).filter(t=>t.type==='exp');
+  if (prevTxs.length) {
+    const curTotal = exp.reduce((a,t)=>a+t.amount,0);
+    const prevTotal = prevTxs.reduce((a,t)=>a+t.amount,0);
+    const diff = curTotal - prevTotal;
+    const pct = Math.abs(Math.round(diff/prevTotal*100));
+    if (pct > 5) insights.push({ icon: diff > 0 ? '📈' : '📉', text: diff > 0 ? `Você gastou <strong>${pct}% mais</strong> que o mês anterior` : `Você gastou <strong>${pct}% menos</strong> que o mês anterior 🎉` });
+  }
+
+  const ins = insights[Math.floor(Math.random()*insights.length)] || insights[0];
+  el.innerHTML = `<div class="insight-card stagger-1"><div class="insight-icon">${ins.icon}</div><div class="insight-text">${ins.text}</div></div>`;
+}
+
+// ═══════════════════════════════════════════
+//  RENDER DASHBOARD
+// ═══════════════════════════════════════════
+function renderDash() {
+  const txs = filtered();
+  const inc = txs.filter(t=>t.type==='inc').reduce((a,t)=>a+t.amount,0);
+  const exp = txs.filter(t=>t.type==='exp').reduce((a,t)=>a+t.amount,0);
+  const bal = inc - exp;
+
+  animateNumber('balNum', bal, true);
+  document.getElementById('balVal').style.color = bal < 0 ? 'var(--red)' : bal > 0 ? 'var(--green)' : 'var(--text)';
+  document.getElementById('incVal').textContent = fmt(inc);
+  document.getElementById('expVal').textContent = fmt(exp);
+  document.getElementById('countVal').textContent = txs.length;
+
+  // Budget
+  if (D.budget > 0 && currentMonthOffset === 0) {
+    document.getElementById('budgetSection').style.display = '';
+    const pct = Math.min(100, Math.round(exp/D.budget*100));
+    document.getElementById('budgetAmt').textContent = `${fmt(exp)} / ${fmt(D.budget)}`;
+    document.getElementById('budgetFill').style.width = pct + '%';
+    document.getElementById('budgetFill').style.background = pct > 90
+      ? 'linear-gradient(90deg,var(--red),#ff7070)'
+      : pct > 70 ? 'linear-gradient(90deg,#c98a2a,#e8c97a)'
+      : 'linear-gradient(90deg,var(--gold-d),var(--gold-l))';
+    const rem = D.budget - exp;
+    document.getElementById('budgetHint').textContent = pct >= 100
+      ? '⚠️ Orçamento estourado em ' + fmt(Math.abs(rem))
+      : `Restam ${fmt(rem)} (${100-pct}%)`;
+    document.getElementById('budgetInput').value = D.budget;
+  } else {
+    document.getElementById('budgetSection').style.display = 'none';
+  }
+
+  // Mini cards
+  const incTxs = txs.filter(t=>t.type==='inc');
+  const expTxs = txs.filter(t=>t.type==='exp');
+  document.getElementById('maxInc').textContent = incTxs.length ? fmtShort(Math.max(...incTxs.map(t=>t.amount))) : '—';
+  document.getElementById('maxExp').textContent = expTxs.length ? fmtShort(Math.max(...expTxs.map(t=>t.amount))) : '—';
+
+  // Insights
+  buildInsight(txs);
+
+  // Line chart
+  renderLineChart();
+
+  // Tx list (last 6)
+  renderTxList(document.getElementById('txDash'), txs.slice(-6).reverse());
+}
+
+// ═══════════════════════════════════════════
+//  ANIMATE NUMBER
+// ═══════════════════════════════════════════
+function animateNumber(id, target, sign=false) {
+  const el = document.getElementById(id);
+  const start = 0, dur = 700;
+  const startTime = performance.now();
+  const fmt2 = (v) => Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const tick = (now) => {
+    const p = Math.min((now-startTime)/dur, 1);
+    const ease = 1 - Math.pow(1-p, 3);
+    const cur = start + (target - start) * ease;
+    el.textContent = fmt2(cur);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+// ═══════════════════════════════════════════
+//  LINE CHART (30 days)
+// ═══════════════════════════════════════════
+function renderLineChart() {
+  const svg = document.getElementById('lineChart');
+  const tooltip = document.getElementById('chartTooltip');
+  const labelsEl = document.getElementById('lineLabels');
+  const W = 300, H = 110;
+
+  const days = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0,10);
+    const exp = D.transactions.filter(t=>t.date===key&&t.type==='exp').reduce((a,t)=>a+t.amount,0);
+    const inc = D.transactions.filter(t=>t.date===key&&t.type==='inc').reduce((a,t)=>a+t.amount,0);
+    days.push({ date: d, key, exp, inc, label: d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}) });
+  }
+
+  const maxVal = Math.max(...days.map(d=>Math.max(d.exp,d.inc)), 1);
+  const toY = (v) => H - 10 - (v/maxVal) * (H-20);
+  const toX = (i) => (i/(days.length-1)) * W;
+
+  const buildPath = (key) => {
+    const pts = days.map((d,i) => `${toX(i).toFixed(1)},${toY(d[key]).toFixed(1)}`);
+    return 'M' + pts.join(' L');
+  };
+  const buildArea = (key, color) => {
+    const pts = days.map((d,i) => `${toX(i).toFixed(1)},${toY(d[key]).toFixed(1)}`);
+    return `M${toX(0)},${H} L` + pts.join(' L') + ` L${toX(days.length-1)},${H} Z`;
+  };
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const gridColor = isDark ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.05)';
+
+  let html = '';
+  // Grid lines
+  [0.25,0.5,0.75].forEach(f => {
+    const y = toY(maxVal * f);
+    html += `<line x1="0" y1="${y.toFixed(1)}" x2="${W}" y2="${y.toFixed(1)}" stroke="${gridColor}" stroke-width="1"/>`;
+  });
+  // Area fills
+  html += `<path d="${buildArea('exp')}" fill="url(#redGrad)" opacity="0.25"/>`;
+  html += `<path d="${buildArea('inc')}" fill="url(#greenGrad)" opacity="0.2"/>`;
+  // Lines
+  html += `<path d="${buildPath('exp')}" fill="none" stroke="var(--red)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>`;
+  html += `<path d="${buildPath('inc')}" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="4 3"/>`;
+  // Dots (today)
+  const todayI = days.length - 1;
+  html += `<circle cx="${toX(todayI).toFixed(1)}" cy="${toY(days[todayI].exp).toFixed(1)}" r="4" fill="var(--red)" stroke="var(--surface)" stroke-width="2"/>`;
+  // Gradients
+  html += `<defs>
+    <linearGradient id="redGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--red)"/><stop offset="100%" stop-color="var(--red)" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--green)"/><stop offset="100%" stop-color="var(--green)" stop-opacity="0"/>
+    </linearGradient>
+  </defs>`;
+
+  svg.innerHTML = html;
+
+  // X labels (every 7 days)
+  const lblIdxs = [0, 7, 14, 21, 29];
+  labelsEl.innerHTML = lblIdxs.map(i => `<span class="x-label">${days[i].date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}</span>`).join('');
+
+  // Touch/mouse interaction
+  const wrap = document.getElementById('lineWrap');
+  const showTip = (clientX) => {
+    const rect = svg.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const ratio = x / rect.width;
+    const idx = Math.max(0, Math.min(days.length-1, Math.round(ratio*(days.length-1))));
+    const d = days[idx];
+    tooltip.innerHTML = `<div style="font-size:10px;color:var(--muted);margin-bottom:2px">${d.label}</div>${d.exp>0?`<span style="color:var(--red)">▼ ${fmt(d.exp)}</span>`:''} ${d.inc>0?`<span style="color:var(--green)">▲ ${fmt(d.inc)}</span>`:''}${d.exp===0&&d.inc===0?'<span style="color:var(--muted)">Sem lançamentos</span>':''}`;
+    tooltip.style.opacity = '1';
+    const tipX = Math.min(rect.width - 160, Math.max(0, x - 70));
+    tooltip.style.left = tipX + 'px';
+    tooltip.style.top = '0px';
+  };
+  wrap.ontouchmove = (e) => { e.preventDefault(); showTip(e.touches[0].clientX); };
+  wrap.ontouchend = () => { setTimeout(()=>tooltip.style.opacity='0',1000); };
+  wrap.onmousemove = (e) => showTip(e.clientX);
+  wrap.onmouseleave = () => tooltip.style.opacity='0';
+}
+
+// ═══════════════════════════════════════════
+//  TX LIST WITH SWIPE
+// ═══════════════════════════════════════════
+function renderTxList(el, txs) {
+  if (!txs.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">Nenhum lançamento</div></div>`;
+    return;
+  }
+  el.innerHTML = txs.map((tx, i) => `
+    <div class="tx-wrap stagger-${Math.min(i,5)}" id="wrap-${tx.id}">
+      <div class="tx-delete-bg"><span>🗑</span></div>
+      <div class="tx" id="tx-${tx.id}" data-id="${tx.id}">
+        <div class="tx-icon" style="background:${tx.type==='inc'?'var(--green-bg)':'var(--red-bg)'}">${tx.cat.split(' ')[0]}</div>
+        <div class="tx-info">
+          <div class="tx-name">${tx.name}</div>
+          <div class="tx-cat">${tx.cat.substring(tx.cat.indexOf(' ')+1)}</div>
+          ${tx.recurId ? '<div class="tx-recur">↺ Recorrente</div>' : ''}
+        </div>
+        <div class="tx-right">
+          <div class="tx-amt" style="color:${tx.type==='inc'?'var(--green)':'var(--red)'}">${tx.type==='inc'?'+':'−'}${fmt(tx.amount)}</div>
+          <div class="tx-date">${new Date(tx.date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Swipe to delete
+  txs.forEach(tx => {
+    const txEl = document.getElementById('tx-'+tx.id);
+    if (!txEl) return;
+    let startX = 0, curX = 0, swiping = false;
+    const threshold = 80;
+
+    txEl.addEventListener('touchstart', e => { startX = e.touches[0].clientX; swiping = true; }, { passive: true });
+    txEl.addEventListener('touchmove', e => {
+      if (!swiping) return;
+      curX = e.touches[0].clientX - startX;
+      if (curX < 0) txEl.style.transform = `translateX(${Math.max(curX,-120)}px)`;
+    }, { passive: true });
+    txEl.addEventListener('touchend', () => {
+      if (curX < -threshold) {
+        txEl.style.transform = 'translateX(-110%)';
+        setTimeout(() => deleteTx(tx.id), 250);
+      } else {
+        txEl.style.transform = '';
+      }
+      swiping = false; curX = 0;
+    });
+  });
+}
+
+function deleteTx(id) {
+  D.transactions = D.transactions.filter(t=>t.id!==id);
+  save(); renderAll();
+}
+
+// ═══════════════════════════════════════════
+//  STATS
+// ═══════════════════════════════════════════
+function renderStats() {
+  // Histogram 6 months
+  const vals = Array.from({length:6},(_,i)=>filtered(i).filter(t=>t.type==='exp').reduce((a,t)=>a+t.amount,0));
+  const max = Math.max(...vals, 1);
+  document.getElementById('histBars').innerHTML = vals.map((v,i) => {
+    const h = Math.round((v/max)*90)+4;
+    const active = i === currentMonthOffset;
+    return `<div class="hbar-wrap"><div class="hbar" style="height:${h}px;background:${active?'var(--gold)':'var(--border)'}"></div><div class="hbar-lbl">${monthLabel(i)}</div><div class="hbar-val">${fmtShort(v)}</div></div>`;
+  }).join('');
+
+  // Donut
+  const txs = filtered();
+  const cats = {};
+  txs.filter(t=>t.type==='exp').forEach(t=>{ cats[t.cat]=(cats[t.cat]||0)+t.amount; });
+  const total = Object.values(cats).reduce((a,v)=>a+v,0)||1;
+  const colors = ['#b8892a','#4caf7d','#e05c5c','#5c9ee0','#9b7fe8','#e0a85c','#5ce0c9'];
+  const entries = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+
+  if (entries.length) {
+    let offset = 25, svgParts = `<circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--border)" stroke-width="3.8"/>`;
+    entries.forEach(([cat,val],i) => {
+      const pct = val/total*100;
+      svgParts += `<circle cx="18" cy="18" r="15.9155" fill="none" stroke="${colors[i%colors.length]}" stroke-width="3.8" stroke-dasharray="${pct} ${100-pct}" stroke-dashoffset="${-offset}" stroke-linecap="round"/>`;
+      offset -= pct;
+    });
+    document.getElementById('donutSvg').innerHTML = svgParts;
+    document.getElementById('legend').innerHTML = entries.slice(0,5).map(([cat,val],i) =>
+      `<div class="leg-item"><div class="leg-dot" style="background:${colors[i%colors.length]}"></div><span class="leg-name">${cat.substring(cat.indexOf(' ')+1)}</span><span class="leg-pct">${Math.round(val/total*100)}%</span></div>`
+    ).join('');
+  } else {
+    document.getElementById('donutSvg').innerHTML = '';
+    document.getElementById('legend').innerHTML = '<div style="color:var(--muted);font-size:13px">Sem gastos registrados</div>';
+  }
+
+  // Comparativo
+  const cur = filtered(0).filter(t=>t.type==='exp').reduce((a,t)=>a+t.amount,0);
+  const prev = filtered(1).filter(t=>t.type==='exp').reduce((a,t)=>a+t.amount,0);
+  const cMax = Math.max(cur,prev,1);
+  document.getElementById('compWrap').innerHTML = [
+    {label:monthLabel(1),val:prev,color:'var(--border)'},
+    {label:monthLabel(0),val:cur,color:'var(--gold)'}
+  ].map(({label,val,color}) => {
+    const h = Math.round((val/cMax)*70)+4;
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+      <div style="height:${h}px;width:100%;border-radius:8px 8px 3px 3px;background:${color}"></div>
+    </div>`;
+  }).join('');
+  document.getElementById('compLabels').innerHTML = [
+    {label:monthLabel(1),val:prev,color:'var(--muted)'},
+    {label:monthLabel(0),val:cur,color:'var(--gold)'}
+  ].map(({label,val,color}) =>
+    `<div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--muted)">${label}</div><div style="font-size:12px;font-weight:600;color:${color};margin-top:2px">${fmtShort(val)}</div></div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════
+//  NAPOLEÃO HILL — QUOTES CAROUSEL
+// ═══════════════════════════════════════════
+const NH_QUOTES = [
+  "Um objetivo é um sonho com prazo definido. Sem um objetivo claro e definitivo, você estará à mercê de cada vento que soprar.",
+  "O segredo do sucesso é ter um propósito definitivo na vida e a determinação inabalável de realizá-lo.",
+  "Defina seu objetivo definitivo, escreva-o, estabeleça um prazo, crie um plano e comece agora — mesmo que não esteja totalmente pronto.",
+  "A diferença entre o sucesso e o fracasso não é falta de força, conhecimento ou coragem — é falta de vontade.",
+  "Todo grande realizador foi um grande sonhador. O ponto de partida de toda conquista é o desejo ardente.",
+  "Você é o mestre do seu destino. Você pode influenciar, dirigir e controlar seu próprio ambiente.",
+  "A persistência é ao caráter humano o que o carbono é para o aço.",
+  "A imaginação é o laboratório da alma, onde todos os planos do homem têm sua origem.",
+  "O sucesso requer nenhuma explicação. O fracasso não permite nenhuma desculpa.",
+  "Cada adversidade carrega em si a semente de um benefício equivalente ou maior.",
+  "Quando sua riqueza começar a vir, ela virá em tanta abundância que você se perguntará onde estava escondida todos esses anos.",
+  "A fé é a cabeça da química que combina pensamentos com ação para criar riqueza."
+];
+
+let nhIdx = D.nhIdx || 0;
+
+function renderQuote() {
+  const el = document.getElementById('nhQuote');
+  const dots = document.getElementById('nhDots');
+  if (!el || !dots) return;
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(6px)';
+  setTimeout(() => {
+    el.textContent = NH_QUOTES[nhIdx];
+    el.style.transition = 'opacity .35s, transform .35s';
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+  }, 150);
+  dots.innerHTML = NH_QUOTES.map((_,i) =>
+    `<div class="nh-dot${i===nhIdx?' active':''}" onclick="event.stopPropagation();jumpQuote(${i})"></div>`
+  ).join('');
+}
+function nextQuote() {
+  nhIdx = (nhIdx + 1) % NH_QUOTES.length;
+  D.nhIdx = nhIdx; save(); renderQuote();
+}
+function jumpQuote(i) {
+  nhIdx = i; D.nhIdx = i; save(); renderQuote();
+}
+
+// ═══════════════════════════════════════════
+//  52 SEMANAS
+// ═══════════════════════════════════════════
+function currentWeekOfYear() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 1);
+  return Math.ceil((now - start + (start.getTimezoneOffset() - now.getTimezoneOffset()) * 60000) / (7 * 86400000));
+}
+
+function renderWeeks() {
+  const grid = document.getElementById('w52Grid');
+  if (!grid) return;
+  if (!D.weeks) D.weeks = [];
+  const curWeek = currentWeekOfYear();
+  const done = D.weeks.length;
+  const pct = Math.round(done / 52 * 100);
+
+  document.getElementById('w52Badge').textContent = `${done} / 52`;
+  document.getElementById('w52Done').textContent = done;
+  document.getElementById('w52Left').textContent = 52 - done;
+  document.getElementById('w52Pct').textContent = pct + '%';
+  document.getElementById('w52Fill').style.width = pct + '%';
+
+  grid.innerHTML = Array.from({length: 52}, (_, i) => {
+    const wk = i + 1;
+    const isDone = D.weeks.includes(wk);
+    const isCur = wk === curWeek && !isDone;
+    return `<div class="w52-week${isDone?' done':isCur?' current':''}" onclick="toggleWeek(${wk})" title="Semana ${wk}"><span class="w52-wnum">${wk}</span></div>`;
+  }).join('');
+}
+
+function toggleWeek(wk) {
+  if (!D.weeks) D.weeks = [];
+  const idx = D.weeks.indexOf(wk);
+  if (idx > -1) {
+    D.weeks.splice(idx, 1);
+  } else {
+    D.weeks.push(wk);
+    D.weeks.sort((a,b)=>a-b);
+    if ([13,26,39,52].includes(D.weeks.length)) confetti();
+  }
+  save(); renderWeeks();
+}
+function resetWeeks() {
+  if (!confirm('Reiniciar as 52 semanas? Seu progresso será perdido.')) return;
+  D.weeks = []; save(); renderWeeks();
+}
+
+// ═══════════════════════════════════════════
+//  GOALS
+// ═══════════════════════════════════════════
+function renderGoals() {
+  renderQuote();
+  renderWeeks();
+
+  const el = document.getElementById('goalList');
+  if (!D.goals.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🎯</div><div class="empty-text">Nenhuma meta ainda</div></div>`;
+  } else {
+    el.innerHTML = D.goals.map(g => {
+      const pct = Math.min(100, Math.round(g.saved/g.target*100));
+      return `<div class="goal-card stagger-0">
+        <div class="goal-top">
+          <div class="goal-emoji">${g.emoji}</div>
+          <div class="goal-info">
+            <div class="goal-name">${g.name}</div>
+            <div class="goal-sub">Meta: ${fmt(g.target)}</div>
+          </div>
+          <div class="goal-pct-badge">${pct}%</div>
+        </div>
+        <div class="goal-prog-track"><div class="goal-prog-fill" style="width:${pct}%"></div></div>
+        <div class="goal-amounts">
+          <span class="goal-amt-label">Guardado: <strong style="color:var(--green)">${fmt(g.saved)}</strong></span>
+          <span class="goal-amt-label">Falta: <strong style="color:var(--red)">${fmt(Math.max(0,g.target-g.saved))}</strong></span>
+        </div>
+        <div class="goal-btn-row">
+          <button class="goal-btn primary" onclick="openAddToGoal('${g.id}')">+ Adicionar</button>
+          <button class="goal-btn" onclick="deleteGoal('${g.id}')">Excluir</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Recurrents
+  const rel = document.getElementById('recurList');
+  if (!D.recurrents.length) {
+    rel.innerHTML = `<div class="empty-state"><div class="empty-icon">🔄</div><div class="empty-text">Nenhuma recorrente</div></div>`;
+  } else {
+    rel.innerHTML = D.recurrents.map(r => `
+      <div class="recur-card">
+        <div class="recur-icon" style="background:${r.type==='exp'?'var(--red-bg)':'var(--green-bg)'}">${r.cat.split(' ')[0]}</div>
+        <div class="recur-info">
+          <div class="recur-name">${r.name}</div>
+          <div class="recur-day">Todo dia ${r.day} · ${r.cat.substring(r.cat.indexOf(' ')+1)}</div>
+        </div>
+        <div class="recur-amt" style="color:${r.type==='exp'?'var(--red)':'var(--green)'}">${r.type==='inc'?'+':'−'}${fmt(r.amount)}</div>
+        <button class="recur-del" onclick="deleteRecur('${r.id}')">✕</button>
+      </div>
+    `).join('');
+  }
+}
+
+function deleteGoal(id) {
+  if (!confirm('Excluir esta meta?')) return;
+  D.goals = D.goals.filter(g=>g.id!==id);
+  save(); renderGoals();
+}
+function deleteRecur(id) {
+  D.recurrents = D.recurrents.filter(r=>r.id!==id);
+  save(); renderGoals();
+}
+function openAddToGoal(id) { openModal('addToGoal', id); }
+
+// ═══════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════
+function renderSettings() {
+  document.getElementById('statTotal').textContent = D.transactions.length;
+  document.getElementById('statGoals').textContent = D.goals.length;
+  document.getElementById('statRecur').textContent = D.recurrents.length;
+  if (D.budget) document.getElementById('budgetInput').value = D.budget;
+  // Storage estimate
+  const bytes = new Blob([JSON.stringify(D)]).size;
+  const kb = (bytes/1024).toFixed(1);
+  const si = document.getElementById('storageInfo');
+  if (si) si.textContent = `${kb} KB local`;
+  // Theme pill
+  const l = document.getElementById('thOptLight');
+  const dk = document.getElementById('thOptDark');
+  if (l) l.classList.toggle('active', D.theme !== 'dark');
+  if (dk) dk.classList.toggle('active', D.theme === 'dark');
+}
+function saveBudget() {
+  const v = parseFloat(document.getElementById('budgetInput').value);
+  if (v > 0) { D.budget = v; save(); renderAll(); alert('Orçamento salvo! ✓'); }
+}
+function clearAll() {
+  if (confirm('Apagar TODOS os dados permanentemente?')) {
+    D = { transactions:[], goals:[], recurrents:[], budget:0, theme: D.theme, weeks:[], nhIdx:0,
+          profile:{ name:'', email:'', phone:'', birthday:'', city:'', job:'', bio:'', goal:'', income:'' },
+          avatarImg:'', coverImg:'' };
+    save(); renderAll();
+  }
+}
+
+// ═══════════════════════════════════════════
+//  PROFILE
+// ═══════════════════════════════════════════
+const PROFILE_FIELDS = {
+  name:'pfName', email:'pfEmail', phone:'pfPhone', birthday:'pfBirthday',
+  city:'pfCity', job:'pfJob', bio:'pfBio', goal:'pfGoal', income:'pfIncome'
+};
+
+function renderProfile() {
+  const p = D.profile;
+
+  // Avatar
+  const avImg = document.getElementById('avatarImg');
+  const avPh = document.getElementById('avatarPlaceholder');
+  if (D.avatarImg && avImg) {
+    avImg.src = D.avatarImg; avImg.style.display = 'block';
+    if (avPh) avPh.style.display = 'none';
+  } else if (avImg) {
+    avImg.style.display = 'none';
+    if (avPh) { avPh.style.display = 'flex'; avPh.textContent = p.name ? p.name[0].toUpperCase() : '?'; }
+  }
+
+  // Cover
+  const covImg = document.getElementById('coverImg');
+  if (D.coverImg && covImg) { covImg.src = D.coverImg; covImg.style.display = 'block'; }
+  else if (covImg) covImg.style.display = 'none';
+
+  // Name + job tag
+  const nameEl = document.getElementById('profileNameDisplay');
+  const jobTag = document.getElementById('profileJobTag');
+  if (nameEl) nameEl.textContent = p.name || 'Seu Nome';
+  if (jobTag) jobTag.textContent = [p.job, p.city].filter(Boolean).join(' · ');
+
+  // Bio + location
+  const bioEl = document.getElementById('profileBioDisplay');
+  const locEl = document.getElementById('profileLocDisplay');
+  if (bioEl) {
+    bioEl.textContent = p.bio || 'Adicione uma bio...';
+    bioEl.style.color = p.bio ? 'var(--text2)' : 'var(--muted)';
+    bioEl.style.fontStyle = p.bio ? 'normal' : 'italic';
+  }
+  if (locEl) locEl.textContent = '';
+
+  // Stats (animated count-up)
+  const psTx = document.getElementById('psTx');
+  const psG = document.getElementById('psGoals');
+  const psW = document.getElementById('psWeeks');
+  if (psTx) psTx.textContent = D.transactions.length;
+  if (psG) psG.textContent = D.goals.length;
+  if (psW) psW.textContent = (D.weeks||[]).length;
+
+  // Nav icon — show mini avatar or emoji
+  const navIco = document.getElementById('navProfileIcon');
+  if (navIco) navIco.textContent = D.avatarImg ? '●' : '👤';
+
+  // Field rows
+  Object.entries(PROFILE_FIELDS).forEach(([key, elId]) => {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    let val = p[key];
+    if (key === 'birthday' && val) {
+      try { val = new Date(val+'T12:00:00').toLocaleDateString('pt-BR'); } catch(e){}
+    }
+    if (key === 'income' && val) val = 'R$ ' + parseFloat(val).toLocaleString('pt-BR',{minimumFractionDigits:2});
+    el.textContent = val || '—';
+    el.className = 'profile-field-val' + (val ? '' : ' empty');
+  });
+}
+
+function editProfileField(field, placeholder, type) {
+  const cur = D.profile[field] || '';
+  const isTextarea = type === 'textarea';
+  const isDate = type === 'date';
+  const isDecimal = type === 'decimal';
+
+  const labels = { name:'Nome', email:'E-mail', phone:'Telefone', birthday:'Nascimento',
+    city:'Cidade', job:'Profissão', bio:'Bio', goal:'Objetivo definitivo', income:'Renda mensal (R$)' };
+
+  document.getElementById('modalScroll').innerHTML = `
+    <div class="modal-title">✏️ ${labels[field]||field}</div>
+    <div class="field">
+      <label>${labels[field]||field}</label>
+      ${isTextarea
+        ? `<textarea id="pfInput" rows="4" placeholder="${placeholder}" style="width:100%;background:var(--input-bg);border:1.5px solid transparent;border-radius:13px;padding:13px 15px;color:var(--text);font-family:'Outfit',sans-serif;font-size:15px;outline:none;resize:none;transition:.25s">${cur}</textarea>`
+        : `<input type="${isDate?'date':isDecimal?'number':'text'}" id="pfInput" placeholder="${placeholder}" value="${cur}" ${isDecimal?'step="0.01" inputmode="decimal"':''} autocomplete="off">`
+      }
+    </div>
+    <button class="btn-primary" onclick="saveProfileField('${field}')">Salvar</button>
+    <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+  `;
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('pfInput')?.focus(), 350);
+}
+
+function saveProfileField(field) {
+  const val = document.getElementById('pfInput')?.value?.trim() || '';
+  D.profile[field] = val;
+  save(); renderProfile(); closeModal();
+  // Flash animation on the saved field after modal closes
+  const elId = PROFILE_FIELDS[field];
+  if (elId) {
+    setTimeout(() => {
+      const el = document.getElementById(elId);
+      if (el) {
+        el.classList.remove('val-saved');
+        void el.offsetWidth; // reflow
+        el.classList.add('val-saved');
+        setTimeout(() => el.classList.remove('val-saved'), 500);
+      }
+    }, 320);
+  }
+}
+
+function triggerAvatarUpload() { document.getElementById('avatarInput').click(); }
+function triggerCoverUpload() { document.getElementById('coverInput').click(); }
+
+function handleAvatarUpload(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { D.avatarImg = ev.target.result; save(); renderProfile(); };
+  reader.readAsDataURL(file);
+}
+function handleCoverUpload(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { D.coverImg = ev.target.result; save(); renderProfile(); };
+  reader.readAsDataURL(file);
+}
+
+// ═══════════════════════════════════════════
+//  PWA — INSTALL PROMPT
+// ═══════════════════════════════════════════
+let deferredPrompt = null;
+let pwaManifestInjected = false;
+
+function injectManifest() {
+  if (pwaManifestInjected) return;
+  pwaManifestInjected = true;
+  const manifest = {
+    name: 'Aurum Finanças',
+    short_name: 'Aurum',
+    description: 'App premium de finanças pessoais',
+    start_url: '.',
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#f5f3ef',
+    theme_color: '#b8892a',
+    icons: [
+      { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%23b8892a'/%3E%3Ctext x='96' y='130' text-anchor='middle' font-size='110' font-family='serif' fill='white'%3E💰%3C/text%3E%3C/svg%3E", sizes: '192x192', type: 'image/svg+xml' },
+      { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23b8892a'/%3E%3Ctext x='256' y='340' text-anchor='middle' font-size='300' font-family='serif' fill='white'%3E💰%3C/text%3E%3C/svg%3E", sizes: '512x512', type: 'image/svg+xml' }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const link = document.getElementById('pwaManifest');
+  if (link) link.href = url;
+}
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show banner after 3s if not dismissed before
+  if (!localStorage.getItem('aurum_pwa_dismissed')) {
+    setTimeout(() => {
+      const b = document.getElementById('pwaBanner');
+      if (b) b.style.display = 'flex';
+    }, 3000);
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  const b = document.getElementById('pwaBanner');
+  if (b) b.style.display = 'none';
+  deferredPrompt = null;
+});
+
+function installPwa() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(c => {
+      if (c.outcome === 'accepted') {
+        const b = document.getElementById('pwaBanner');
+        if (b) b.style.display = 'none';
+      }
+      deferredPrompt = null;
+    });
+  } else {
+    // Fallback instruction
+    alert('Para instalar:\n\n📱 Chrome Android: menu ⋮ → "Adicionar à tela inicial"\n🍎 Safari iOS: botão compartilhar → "Adicionar à tela de início"');
+  }
+}
+function dismissPwa() {
+  const b = document.getElementById('pwaBanner');
+  if (b) b.style.display = 'none';
+  localStorage.setItem('aurum_pwa_dismissed', '1');
+}
+
+// ═══════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════
+const CATS = ['🍔 Alimentação','🏠 Moradia','🚗 Transporte','💊 Saúde','🎬 Lazer','📱 Tecnologia','👕 Vestuário','📚 Educação','💼 Trabalho','✈️ Viagem','🐾 Pets','💳 Outros'];
+const EMOJIS = ['🎯','🚗','🏠','✈️','💍','🎓','📱','💪','🌍','🎸','🏋️','🐕'];
+
+function modalHTML(type, id='') {
+  const today = new Date().toISOString().slice(0,10);
+  const catOpts = CATS.map(c=>`<option value="${c}">${c}</option>`).join('');
+
+  if (type === 'exp' || type === 'inc') {
+    return `
+      <div class="modal-title">${type==='exp'?'💸 Novo Gasto':'💰 Nova Receita'}</div>
+      <div class="field"><label>Descrição</label><input type="text" id="mName" placeholder="Ex: Mercado" autocomplete="off"></div>
+      <div class="field"><label>Valor (R$)</label><input type="number" id="mAmt" placeholder="0,00" inputmode="decimal" step="0.01"></div>
+      <div class="field"><label>Categoria</label><select id="mCat">${catOpts}</select></div>
+      <div class="field"><label>Data</label><input type="date" id="mDate" value="${today}"></div>
+      <button class="btn-primary" onclick="saveTx('${type}')">Adicionar</button>
+    `;
+  }
+  if (type === 'goal') {
+    const emojiOpts = EMOJIS.map(e=>`<option value="${e}">${e}</option>`).join('');
+    return `
+      <div class="modal-title">🎯 Nova Meta</div>
+      <div class="field"><label>Nome da meta</label><input type="text" id="gName" placeholder="Ex: Viagem para Europa"></div>
+      <div class="field"><label>Ícone</label><select id="gEmoji">${emojiOpts}</select></div>
+      <div class="field"><label>Valor alvo (R$)</label><input type="number" id="gTarget" placeholder="0,00" inputmode="decimal"></div>
+      <div class="field"><label>Já guardei (R$)</label><input type="number" id="gSaved" placeholder="0,00" inputmode="decimal"></div>
+      <button class="btn-primary" onclick="saveGoal()">Criar Meta</button>
+    `;
+  }
+  if (type === 'recur') {
+    return `
+      <div class="modal-title">🔄 Novo Recorrente</div>
+      <div class="field"><label>Descrição</label><input type="text" id="rName" placeholder="Ex: Netflix"></div>
+      <div class="field"><label>Valor (R$)</label><input type="number" id="rAmt" placeholder="0,00" inputmode="decimal"></div>
+      <div class="field"><label>Categoria</label><select id="rCat">${catOpts}</select></div>
+      <div class="field"><label>Dia do mês</label><input type="number" id="rDay" placeholder="Ex: 5" min="1" max="28" inputmode="numeric"></div>
+      <div class="type-row" style="margin-bottom:14px">
+        <button class="type-btn sel-exp" id="rtExp" onclick="setRType('exp')">💸 Gasto</button>
+        <button class="type-btn" id="rtInc" onclick="setRType('inc')">💰 Receita</button>
+      </div>
+      <button class="btn-primary" onclick="saveRecur()">Salvar</button>
+    `;
+  }
+  if (type === 'addToGoal') {
+    const g = D.goals.find(g=>g.id===id);
+    return `
+      <div class="modal-title">${g.emoji} ${g.name}</div>
+      <div style="color:var(--muted);font-size:13px;margin-bottom:16px">Guardado: ${fmt(g.saved)} de ${fmt(g.target)}</div>
+      <div class="field"><label>Quanto adicionar (R$)</label><input type="number" id="agAmt" placeholder="0,00" inputmode="decimal"></div>
+      <button class="btn-primary" onclick="addToGoal('${id}')">Adicionar à meta</button>
+    `;
+  }
+}
+
+let rType = 'exp';
+function setRType(t) {
+  rType = t;
+  document.getElementById('rtExp').className = 'type-btn' + (t==='exp'?' sel-exp':'');
+  document.getElementById('rtInc').className = 'type-btn' + (t==='inc'?' sel-inc':'');
+}
+
+function openModal(type, id='') {
+  currentModalType = type;
+  document.getElementById('modalScroll').innerHTML = modalHTML(type, id);
+  document.getElementById('overlay').classList.add('open');
+  closeFab();
+  setTimeout(()=>document.querySelector('#modalScroll input')?.focus(), 350);
+}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+function overlayClick(e) { if (e.target===document.getElementById('overlay')) closeModal(); }
+
+function saveTx(type) {
+  const name = document.getElementById('mName').value.trim();
+  const amt = parseFloat(document.getElementById('mAmt').value);
+  const cat = document.getElementById('mCat').value;
+  const date = document.getElementById('mDate').value;
+  if (!name||!amt||amt<=0||!date) return alert('Preencha todos os campos');
+  D.transactions.push({ id:uid(), name, amount:amt, cat, date, type });
+  save(); renderAll(); closeModal();
+}
+function saveGoal() {
+  const name = document.getElementById('gName').value.trim();
+  const emoji = document.getElementById('gEmoji').value;
+  const target = parseFloat(document.getElementById('gTarget').value);
+  const saved = parseFloat(document.getElementById('gSaved').value)||0;
+  if (!name||!target||target<=0) return alert('Preencha todos os campos');
+  const g = { id:uid(), name, emoji, target, saved };
+  D.goals.push(g);
+  if (saved >= target) confetti();
+  save(); renderAll(); closeModal();
+}
+function saveRecur() {
+  const name = document.getElementById('rName').value.trim();
+  const amt = parseFloat(document.getElementById('rAmt').value);
+  const cat = document.getElementById('rCat').value;
+  const day = parseInt(document.getElementById('rDay').value)||1;
+  if (!name||!amt||amt<=0) return alert('Preencha todos os campos');
+  D.recurrents.push({ id:uid(), name, amount:amt, cat, day, type:rType });
+  save(); insertRecurrents(); renderAll(); closeModal();
+}
+function addToGoal(id) {
+  const amt = parseFloat(document.getElementById('agAmt').value);
+  if (!amt||amt<=0) return;
+  const g = D.goals.find(g=>g.id===id);
+  g.saved = Math.min(g.target, g.saved+amt);
+  if (g.saved >= g.target) confetti();
+  save(); renderAll(); closeModal();
+}
+
+// ═══════════════════════════════════════════
+//  FAB
+// ═══════════════════════════════════════════
+function toggleFab() {
+  fabOpen = !fabOpen;
+  document.getElementById('fabBtn').classList.toggle('open', fabOpen);
+  document.getElementById('fabMenu').classList.toggle('open', fabOpen);
+}
+function closeFab() {
+  fabOpen = false;
+  document.getElementById('fabBtn').classList.remove('open');
+  document.getElementById('fabMenu').classList.remove('open');
+}
+document.getElementById('mainScroll').addEventListener('touchstart', closeFab, { passive:true });
+
+// ═══════════════════════════════════════════
+//  PAGE NAV
+// ═══════════════════════════════════════════
+function goPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const pageId = 'page' + name.charAt(0).toUpperCase() + name.slice(1);
+  const pg = document.getElementById(pageId);
+  if (pg) pg.classList.add('active');
+  if (btn && btn.classList) btn.classList.add('active');
+  const noFab = ['set','profile'];
+  document.getElementById('fabWrap').style.display = noFab.includes(name) ? 'none' : '';
+  document.getElementById('mainScroll').scrollTop = 0;
+  closeFab();
+  renderAll();
+}
+
+// ═══════════════════════════════════════════
+//  CONFETTI
+// ═══════════════════════════════════════════
+function confetti() {
+  const colors = ['#c9a84c','#4caf7d','#e05c5c','#5c9ee0','#9b7fe8','#e8c97a'];
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.cssText = `left:${Math.random()*100}vw;background:${colors[Math.floor(Math.random()*colors.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*.5}s;border-radius:${Math.random()>0.5?'50%':'3px'}`;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 3500);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  RENDER ALL
+// ═══════════════════════════════════════════
+function renderAll() {
+  renderDash();
+  renderTxList(document.getElementById('txAll'), filtered().slice().reverse());
+  document.getElementById('txCount').textContent = filtered().length + ' lançamentos';
+  renderStats();
+  renderGoals();
+  renderSettings();
+  renderProfile();
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+injectManifest();
+insertRecurrents();
+buildMonthBar();
+applyTheme(D.theme || 'light');
+renderAll();
+</script>
+</body>
+</html>
